@@ -10,6 +10,7 @@ from pydub import AudioSegment
 from pydub.silence import split_on_silence, detect_silence
 from pydub.playback import play
 
+
 print("Hello World")
 
 file_name = path.dirname(__file__) + "/Audio_Data/bengali6.mp3"
@@ -51,12 +52,33 @@ plt.plot(signal)
 
 segW = AudioSegment.from_wav(path.dirname(__file__) + "/Audio_Data/Wav_Data/test.wav")
 
-chunks = split_on_silence(segW, min_silence_len = 10, silence_thresh = -25, keep_silence = 100)
+chunks = split_on_silence(segW, min_silence_len = 250, silence_thresh = -28, keep_silence = 200)
 
-sil_ranges = detect_silence(segW)
+sil_ranges = detect_silence(segW, min_silence_len = 250, silence_thresh = -28)
 
+j = 0
 for r in sil_ranges:
     print(str(r))
+    j = j+1
+    #play(segW[r[0]:r[1]])
+print(str(j) + " Silent Ranges")
+
+word_ranges = []
+for r in range(len(sil_ranges)):
+    if r < len(sil_ranges) - 1:
+        start = sil_ranges[r][1]
+        end = sil_ranges[r+1][0]
+    else:
+        start = sil_ranges[r][1]
+        end = sil_ranges[r][1] + 1
+    #play(segW[start:end])
+    word_ranges.append((start, end))
+
+print("Word Range:")
+print(word_ranges)
+
+print(str(segW))
+
 
 print("WE ARE HERE")
 n = 0
@@ -65,7 +87,10 @@ for i, chunk in enumerate(chunks):
     time.sleep(0.5)
     play(chunk)
     print(type(chunk))
-print(n)
+    #chunk.export(path.dirname(__file__) + "/Audio_Data/Wav_Data/chunk" + str(i+1) + ".wav")
+    if(i == 19):
+            chunk.export(path.dirname(__file__) + "/Audio_Data/Wav_Data/wednesday.mp3", format = 'mp3')
+print(str(n) + " Chunks")
 
 '''
 from scipy.io.wavfile import read
@@ -80,3 +105,6 @@ dbs = [20*math.log10( math.sqrt(statistics.mean(chunk**2)) ) for chunk in chunks
 print("DBS:")
 print(dbs)
 '''
+
+segW = AudioSegment.from_wav(path.dirname(__file__) + "/Audio_Data/Wav_Data/c.mp3", )
+play(segW)
