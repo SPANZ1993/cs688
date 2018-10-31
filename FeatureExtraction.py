@@ -138,8 +138,16 @@ def convert_to_wav(mp3File, output_folder):
     file_name = os.path.basename(mp3File)
     file_name = file_name.split('.')[0]
     AudioSegment.from_mp3(mp3File).export(output_folder + file_name +".wav", format="wav")
+    return
 
+#INPUT: 1) Fully qualified name of wav file
+#OUTPUT: Average volume in dB of file
+def calculate_avg_db(wavFile):
+    wavdata = (read(wavFile))
+    wavdata = wavdata[1]
+    chunks = np.array_split(wavdata, 1)
+    dbs = [20*math.log10( math.sqrt(statistics.mean(chunk**2)) ) for chunk in chunks]
+    print(dbs)
+    return dbs
 
 convert_to_wav(path.dirname(__file__) + "/Audio_Data/Mp3_Data/LongIslandGirls.mp3", path.dirname(__file__) + "/Audio_Data/Wav_Data/")
-
-#def calculate_avg_db(wavFile):
