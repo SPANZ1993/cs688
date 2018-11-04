@@ -7,6 +7,7 @@ import math
 import statistics
 import time
 import re
+import tensorflow as tf
 from pydub import AudioSegment
 from pydub.silence import split_on_silence, detect_silence
 from pydub.playback import play
@@ -17,8 +18,15 @@ from pydub.playback import play
 def listdir_ignore_hidden(path):
     files = []
     for file in os.listdir(path):
-        if not file.startswith('.') and not os.path.isdir(file):
+        print(os.path.join(path,file))
+        if os.path.isdir(file):
+            print("FOUND A DIRECTORY")
+        if not file.startswith('.') and not os.path.isdir(os.path.join(path,file)):
             files.append(file)
+    print("@@@@@@@@@@@")
+    for file in files:
+        print(file)
+    print("@@@@@@@@@@@")
     return files
 
 
@@ -31,7 +39,7 @@ output_file_name = path.dirname(__file__) + "/Audio_Data/Wav_Data/bengali6.wav"
 print("HELLO")
 print(os.environ['PATH'])
 print("GOODBYE")
-
+'''
 AudioSegment.from_mp3(file_name).export(output_file_name, format="wav") #FFMPEG PROBLEM
 
 
@@ -55,7 +63,7 @@ plt.figure(1)
 plt.title('Signal Wave...')
 plt.plot(signal)
 #plt.show()
-
+'''
 #for i in range(1000):
     #print(signal[i], end = " ")
 
@@ -91,7 +99,7 @@ print(word_ranges)
 print(str(segW))
 '''
 
-
+'''
 audio_files = listdir_ignore_hidden(path.dirname(__file__) + "/Audio_Data/Mp3_Data")
 
 for file in audio_files:
@@ -111,7 +119,7 @@ for file in audio_files:
         #if(i == 19):
         #        chunk.export(path.dirname(__file__) + "/Audio_Data/Wav_Data/wednesday.mp3", format = 'mp3')
     print(str(n) + " Chunks")
-
+'''
 
 from scipy.io.wavfile import read
 '''
@@ -162,7 +170,8 @@ def extract_windows(audio, window_size):
     windows = audio[::window_size]
     window_arr = []
     for window in windows:
-        window_arr.append(window)
+        if(len(window) == window_size):
+            window_arr.append(window)
     return window_arr
 
 #INPUT: 1) An array of windows (from extract_windows) 2) Fully qualified path name to save windows in 3) Name of file windows were generated from
@@ -173,7 +182,7 @@ def save_windows(windows, window_folder, file_name):
         os.makedirs(window_folder)
     window_count = 0
     for window in windows:
-        output_file_name = window_folder + file_name + "_" + str(window_count) + ".wav"
+        output_file_name = os.path.join(window_folder,file_name + "_" + str(window_count) + ".wav")
         #print("OUTPUT: " + output_file_name)
         #play(window)
         window.export(output_file_name, format="wav")
@@ -191,7 +200,10 @@ def convert_to_wav(mp3File, output_folder):
     #file_name = file_name.split('.')[0]
     file_name = extract_file_name(mp3File)
     print(file_name)
-    output_file_name = output_folder + file_name +".wav"
+    if not os.path.exists(output_folder):
+        os.makedirs(output_folder)
+    #output_file_name = output_folder + file_name +".wav"
+    output_file_name = os.path.join(output_folder,file_name + ".wav")
     AudioSegment.from_mp3(mp3File).export(output_file_name, format="wav")
     return output_file_name
 
@@ -214,21 +226,22 @@ def extract_file_name(file_name):
     return file_name
 
 
-#INPUT: 1)Fully qualified path to folder with MP3 Files 2) Fully qualified path to where .wav windows will be saved
+#INPUT: 1)Fully qualified path to folder with MP3 Files 2) Fully qualified path to where .wav windows will be saved 3) Desired length of each window (in ms)
 #OUTPUT: All mp3 files in mp3_folder will be converted to windows and saved as .wav
 def convert_folder_to_windows(mp3_folder, destination_folder, window_size):
     files = listdir_ignore_hidden(mp3_folder)
     for file in files:
         print(file)
         file_name = extract_file_name(file)
-        chunks = extract_chunks(mp3_folder + file)
+        chunks = extract_chunks(os.path.join(mp3_folder,file))
         combined = combine_chunks(chunks)
         windows = extract_windows(combined, window_size)
         count = 0
-        for i in windows:
-            count = count + 1
-        print("COUNT IS: " + str(count))
+        #for window in windows:
+        #    count = count + 1
+        #print("COUNT IS: " + str(count))
         save_windows(windows, destination_folder, file_name)
     return
 
-convert_folder_to_windows(path.dirname(__file__) + "/Audio_Data/Mp3_Data/", path.dirname(__file__) + "/Audio_Data/Test_Windows/", 500)
+#convert_folder_to_windows(path.dirname(__file__) + "/Audio_Data/Mp3_Data/North_America", path.dirname(__file__) + "/Audio_Data/Wav_Data/North_America", 500)
+#convert_folder_to_windows(path.dirname(__file__) + "/Audio_Data/Mp3_Data/India", path.dirname(__file__) + "/Audio_Data/Wav_Data/India", 500)
