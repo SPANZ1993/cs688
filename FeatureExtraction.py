@@ -11,6 +11,7 @@ import tensorflow as tf
 from pydub import AudioSegment
 from pydub.silence import split_on_silence, detect_silence
 from pydub.playback import play
+from convert_WAVtoMFCC import convert_WAVtoMFCC, create_mfcc
 
 
 #List all files in a directory except hidden files
@@ -18,27 +19,23 @@ from pydub.playback import play
 def listdir_ignore_hidden(path):
     files = []
     for file in os.listdir(path):
-        print(os.path.join(path,file))
-        if os.path.isdir(file):
-            print("FOUND A DIRECTORY")
+        #print(os.path.join(path,file))
+        #if os.path.isdir(file):
+            #print("FOUND A DIRECTORY")
         if not file.startswith('.') and not os.path.isdir(os.path.join(path,file)):
             files.append(file)
-    print("@@@@@@@@@@@")
-    for file in files:
-        print(file)
-    print("@@@@@@@@@@@")
+    #print("@@@@@@@@@@@")
+    #for file in files:
+        #print(file)
+    #print("@@@@@@@@@@@")
     return files
 
 
-print("Hello World")
 
-file_name = path.dirname(__file__) + "/Audio_Data/Mp3_Data/bengali6.mp3"
-output_file_name = path.dirname(__file__) + "/Audio_Data/Wav_Data/bengali6.wav"
+#file_name = path.dirname(__file__) + "/Audio_Data/Mp3_Data/bengali6.mp3"
+#output_file_name = path.dirname(__file__) + "/Audio_Data/Wav_Data/bengali6.wav"
 
 
-print("HELLO")
-print(os.environ['PATH'])
-print("GOODBYE")
 '''
 AudioSegment.from_mp3(file_name).export(output_file_name, format="wav") #FFMPEG PROBLEM
 
@@ -143,12 +140,12 @@ def extract_chunks(mp3File):
     wavFolder = path.dirname(__file__) + "/Audio_Data/Wav_Data/"
     wavFile = convert_to_wav(mp3File, wavFolder) # <fileName>.mp3 --> <fileName>.wav
     avgDb = calculate_avg_db(wavFile)
-    print(type(avgDb))
+    #print(type(avgDb))
     silence_thresh = -(0.8 * avgDb) #Threshold of decibels to count as silence
-    print(wavFile)
+    #print(wavFile)
     segment = AudioSegment.from_wav(wavFile)
     #play(segment)
-    print("silence_thresh: " + str(silence_thresh))
+    #print("silence_thresh: " + str(silence_thresh))
     chunks = split_on_silence(segment, min_silence_len = 100, silence_thresh = silence_thresh, keep_silence = 200)
     file_name_base = extract_file_name(mp3File)
     return chunks
@@ -187,7 +184,7 @@ def save_windows(windows, window_folder, file_name):
         #play(window)
         window.export(output_file_name, format="wav")
         window_count = window_count + 1
-    print("INNER COUNT: " + str(window_count))
+    #print("INNER COUNT: " + str(window_count))
     return
 
 
@@ -199,7 +196,7 @@ def convert_to_wav(mp3File, output_folder):
     #file_name = os.path.basename(mp3File)
     #file_name = file_name.split('.')[0]
     file_name = extract_file_name(mp3File)
-    print(file_name)
+    #print(file_name)
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
     #output_file_name = output_folder + file_name +".wav"
@@ -213,8 +210,10 @@ def calculate_avg_db(wavFile):
     wavdata = (read(wavFile))
     wavdata = wavdata[1]
     chunks = np.array_split(wavdata, 1)
+    #for chunk in chunks:
+    #    print(str(statistics.mean(chunk**2)))
     dbs = [20*math.log10( math.sqrt(statistics.mean(chunk**2)) ) for chunk in chunks]
-    print(dbs)
+    #print(dbs)
     return dbs[0]
 
 #INPUT: Fully Qualified File name
@@ -231,7 +230,7 @@ def extract_file_name(file_name):
 def convert_folder_to_windows(mp3_folder, destination_folder, window_size):
     files = listdir_ignore_hidden(mp3_folder)
     for file in files:
-        print(file)
+        #print(file)
         file_name = extract_file_name(file)
         chunks = extract_chunks(os.path.join(mp3_folder,file))
         combined = combine_chunks(chunks)
@@ -243,5 +242,44 @@ def convert_folder_to_windows(mp3_folder, destination_folder, window_size):
         save_windows(windows, destination_folder, file_name)
     return
 
-#convert_folder_to_windows(path.dirname(__file__) + "/Audio_Data/Mp3_Data/North_America", path.dirname(__file__) + "/Audio_Data/Wav_Data/North_America", 500)
-#convert_folder_to_windows(path.dirname(__file__) + "/Audio_Data/Mp3_Data/India", path.dirname(__file__) + "/Audio_Data/Wav_Data/India", 500)
+
+#Input: Fully qualified path name to folder containing .wav files (window_folder), Fully qualified path name to new folder where MFCCs to be saved
+#Output: Folder of mfcc data created from .wav files
+def convert_folder_to_mfcc(wav_folder, mfcc_folder):
+    files = listdir_ignore_hidden(wav_folder)
+    for file in files:
+        print(file)
+        file_name = extract_file_name(file)
+        convert_WAVtoMFCCWAVasMFCC(os.path.join(wav_folder,file), mfcc_folder)
+    return
+
+
+def create_mfcc_array(wav_folder):
+    files = listdir_ignore_hidden(wav_folder)
+    mfcc_arr = []
+    print(len(files))
+    count = 0
+    for file in files:
+        #print("Converting: " + str(count))
+        count = count+1
+        mfcc_arr.append(create_mfcc(os.path.join(wav_folder, file)))
+        #print("WOOT")
+        #print(mfcc_arr)
+    print("Converted :" + str(len(files)))
+    print("TYPE IS: " + str(type(mfcc_arr)))
+    #mfcc_arr = np.asarray(mfcc_arr)
+    #mfcc_arr = mfcc_arr.reshape(mfcc_arr.shape[0], mfcc_arr.shape[1], mfcc_arr.shape[2], 1)
+    print("TYPE IS: " + str(type(mfcc_arr)))
+    return mfcc_arr
+
+
+
+
+convert_folder_to_windows(path.dirname(__file__) + "/Audio_Data/Mp3_Data/North_America", path.dirname(__file__) + "/Audio_Data/Wav_Data/North_America", 500)
+convert_folder_to_windows(path.dirname(__file__) + "/Audio_Data/Mp3_Data/India", path.dirname(__file__) + "/Audio_Data/Wav_Data/India", 500)
+#convert_folder_to_mfcc(path.dirname(__file__) + "/Audio_Data/Wav_Data/North_America", path.dirname(__file__) + "/Audio_Data/MFCC_Data/North_America")
+#convert_folder_to_mfcc(path.dirname(__file__) + "/Audio_Data/Wav_Data/India", path.dirname(__file__) + "/Audio_Data/MFCC_Data/India")
+
+
+#convert_folder_to_windows(path.dirname(__file__) + "/Audio_Data/Mp3_Data/Test_Hindi", path.dirname(__file__) + "/Audio_Data/Wav_Data/Test_Hindi", 500)
+#convert_folder_to_mfcc(path.dirname(__file__) + "/Audio_Data/Wav_Data/Test_Hindi", path.dirname(__file__) + "/Audio_Data/MFCC_Data/Test_Hindi")
