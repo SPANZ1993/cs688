@@ -275,8 +275,8 @@ def create_mfcc_array(wav_folder):
 
 
 
-convert_folder_to_windows(path.dirname(__file__) + "/Audio_Data/Mp3_Data/North_America", path.dirname(__file__) + "/Audio_Data/Wav_Data/North_America", 500)
-convert_folder_to_windows(path.dirname(__file__) + "/Audio_Data/Mp3_Data/India", path.dirname(__file__) + "/Audio_Data/Wav_Data/India", 500)
+#convert_folder_to_windows(path.dirname(__file__) + "/Audio_Data/Mp3_Data/North_America", path.dirname(__file__) + "/Audio_Data/Wav_Data/North_America", 500)
+#convert_folder_to_windows(path.dirname(__file__) + "/Audio_Data/Mp3_Data/India", path.dirname(__file__) + "/Audio_Data/Wav_Data/India", 500)
 #convert_folder_to_mfcc(path.dirname(__file__) + "/Audio_Data/Wav_Data/North_America", path.dirname(__file__) + "/Audio_Data/MFCC_Data/North_America")
 #convert_folder_to_mfcc(path.dirname(__file__) + "/Audio_Data/Wav_Data/India", path.dirname(__file__) + "/Audio_Data/MFCC_Data/India")
 

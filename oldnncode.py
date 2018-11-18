@@ -17,92 +17,8 @@ from keras import backend as K
 import copy
 import time
 
+print("Woo")
 numpy.random.seed(7)
-
-
-'''
-#CANT REMEMBER WHAT THIS IS BUT DON'T WORRY ABOUT IT
-#I DON'T THINK IT IS IMPORTANT
-if K.image_data_format() == 'channels_first':
-    print("channels_first")
-    #x_train = x_train.reshape(x_train.shape[0], 1, img_rows, img_cols)
-    #x_test = x_test.reshape(x_test.shape[0], 1, img_rows, img_cols)
-    #input_shape = (1, img_rows, img_cols)
-else:
-    print("not_channels_first")
-    #x_train = x_train.reshape(x_train.shape[0], img_rows, img_cols, 1)
-    #x_test = x_test.reshape(x_test.shape[0], img_rows, img_cols, 1)
-    #input_shape = (img_rows, img_cols, 1)
-'''
-
-
-
-###########################__SAMPLING_METHODS_USED_BY_BOTH__#########################
-
-
-def uniform_random_sampling(data, labels, sample_size):
-    assert(len(data) == len(labels))
-    complement_data = copy.deepcopy(data)
-    complement_labels = copy.deepcopy(labels)
-    data_size = len(complement_data)
-    #print("((((((((()))))))))")
-    #print(complement_data.shape)
-    #print(complement_labels.shape)
-    #print("((((((((()))))))))")
-    sampled_data_shape = [sample_size]
-    count = 0
-    for s in complement_data.shape:
-        if(count!=0):
-            sampled_data_shape.append(s)
-        count = count+1
-    sampled_data_shape = tuple(sampled_data_shape)
-    sampled_labels_shape = [sample_size]
-    count = 0
-    for s in complement_labels.shape:
-        if(count!=0):
-            sampled_labels_shape.append(s)
-        count = count + 1
-    sampled_labels_shape = tuple(sampled_labels_shape)
-    #print("WOO")
-    #print(sampled_data_shape)
-    #print(sampled_labels_shape)
-    sampled_data = numpy.zeros(shape=(sampled_data_shape))
-    sampled_labels = numpy.zeros(shape=sampled_labels_shape)
-    for i in range(0, sample_size):
-        arr_choice = numpy.random.randint(0,data_size-i)
-        #sampled_data.append(complement_data[arr_choice])
-        sampled_data[i] = complement_data[arr_choice]
-        complement_data = numpy.delete(complement_data, arr_choice, 0)
-        #sampled_labels.append(complement_labels[arr_choice])
-        sampled_labels[i] = complement_labels[arr_choice]
-        complement_labels = numpy.delete(complement_labels, arr_choice, 0)
-    #sampled_data = numpy.asarray(sampled_data)
-    #complement_data = numpy.asarray(complement_data)
-    #sampled_labels = numpy.asarray(complement_data)
-    #complement_labels = numpy.asarray(complement_labels)
-    return (sampled_data, sampled_labels, complement_data, complement_labels)
-
-
-
-def sample_for_k_folds(data, labels, num_folds):
-    assert(len(data) == len(labels))
-    complement_data = copy.deepcopy(data)
-    complement_labels = copy.deepcopy(labels)
-    print("IN K FOLDS SAMPLE")
-    print("LENGTH: " + str(len(data)))
-    sample_size = len(data)//num_folds
-    print("SAMPLE SIZE: " + str(sample_size))
-    folds_arr = []
-    for fold in range(num_folds):
-        sampled_data, sampled_labels, complement_data, complement_labels = uniform_random_sampling(complement_data, complement_labels, sample_size)
-        folds_arr.append([sampled_data, sampled_labels])
-    return folds_arr
-
-
-
-
-###########################__MFCC_ANALYIS_BELOW__#########################
-
 
 def load_mfccs(mfcc_folder):
     files = listdir_ignore_hidden(mfcc_folder)
@@ -116,22 +32,35 @@ def load_mfccs(mfcc_folder):
     return mfcc_arr
 
 
-
 na_mfcc_arr = create_mfcc_array(path.dirname(__file__) + "/Audio_Data/Wav_Data/North_America")
 ind_mfcc_arr = create_mfcc_array(path.dirname(__file__) + "/Audio_Data/Wav_Data/India")
 
 
 
+
+#NOTE:
 #0 Label Corresponds to North America
 #1 Label Corresponds to India
 
+if K.image_data_format() == 'channels_first':
+    print("channels_first")
+    #x_train = x_train.reshape(x_train.shape[0], 1, img_rows, img_cols)
+    #x_test = x_test.reshape(x_test.shape[0], 1, img_rows, img_cols)
+    #input_shape = (1, img_rows, img_cols)
+else:
+    print("not_channels_first")
+    #x_train = x_train.reshape(x_train.shape[0], img_rows, img_cols, 1)
+    #x_test = x_test.reshape(x_test.shape[0], img_rows, img_cols, 1)
+    #input_shape = (img_rows, img_cols, 1)
 
 
+
+#THIS IS FOR MFCC's
 def create_array_and_labels(*argv):
     num_classes = len(argv)
     #print("NUM:")
     #print(num_classes)
-    time.sleep(5)
+    #time.sleep(5)
     non_empty_arrays = True
     data_array = []
     label_array = []
@@ -153,6 +82,41 @@ def create_array_and_labels(*argv):
 
 
 
+#THIS IS FOR MFCC's
+def uniform_random_sampling(data, labels, sample_size):
+    assert(len(data) == len(labels))
+    complement_data = copy.deepcopy(data)
+    complement_labels = copy.deepcopy(labels)
+    data_size = len(complement_data)
+    sampled_data_shape = [sample_size]
+    count = 0
+    for s in complement_data.shape:
+        if(count!=0):
+            sampled_data_shape.append(s)
+        count = count+1
+    sampled_data_shape = tuple(sampled_data_shape)
+    sampled_labels_shape = [sample_size]
+    count = 0
+    for s in complement_labels.shape:
+        if(count!=0):
+            sampled_labels_shape.append(s)
+        count = count + 1
+    sampled_labels_shape = tuple(sampled_labels_shape)
+    sampled_data = numpy.zeros(shape=(sampled_data_shape))
+    sampled_labels = numpy.zeros(shape=sampled_labels_shape)
+    for i in range(0, sample_size):
+        arr_choice = numpy.random.randint(0,data_size-i)
+        #sampled_data.append(complement_data[arr_choice])
+        sampled_data[i] = complement_data[arr_choice]
+        complement_data = numpy.delete(complement_data, arr_choice, 0)
+        #sampled_labels.append(complement_labels[arr_choice])
+        sampled_labels[i] = complement_labels[arr_choice]
+        complement_labels = numpy.delete(complement_labels, arr_choice, 0)
+    #sampled_data = numpy.asarray(sampled_data)
+    #complement_data = numpy.asarray(complement_data)
+    #sampled_labels = numpy.asarray(complement_data)
+    #complement_labels = numpy.asarray(complement_labels)
+    return (sampled_data, sampled_labels, complement_data, complement_labels)
 
 
 #MAKE SURE THIS WORKS CORRECTLY
@@ -175,19 +139,10 @@ def sample_for_k_folds(data, labels, num_folds):
 
 data_arr, label_arr = create_array_and_labels(na_mfcc_arr, ind_mfcc_arr)
 
-#folds_arr = sample_for_k_folds(data_arr, label_arr, 5)
-
-#print(data_arr.shape)
-#print(label_arr.shape)
-
 sampled_train_data, sampled_train_labels, sampled_test_data, sampled_test_labels = uniform_random_sampling(data_arr, label_arr, data_arr.shape[0] - 200)
 
-'''
-print(sampled_train_data.shape)
-print(sampled_train_labels.shape)
-print(sampled_test_data.shape)
-print(sampled_test_labels.shape)
-'''
+#WILL BE USED FOR K-Folds
+folds_arr = sample_for_k_folds(data_arr, label_arr, 5)
 
 
 
@@ -195,9 +150,9 @@ print(sampled_test_labels.shape)
 
 
 
-print("BEGINNING MFCC TRAINING.....")
 
 
+print("BEGINNING TRAINING.....")
 
 
 
@@ -237,32 +192,27 @@ print('Test accuracy:', score[1])
 
 
 
-##################################____WAV DATA ANALYSIS BELOW______####################
 
-print("########################BEGINNING WAV ANALYSIS#################################")
-
-
+#####################################______WAV DATA BELOW______####################################################
 
 def load_wavs(wav_folder, split_num):
     files = listdir_ignore_hidden(wav_folder)
-    wav_arr = []
-    arr_len = 0
+    wav_array = []
+    array_len = 0
+    accepted = True
     for file in files:
+        #print(len(wav_array))
         file_path = os.path.join(wav_folder, file)
         audio_seg = AudioSegment.from_file(file_path)
         array = audio_seg.get_array_of_samples()
         array = array[::split_num]
-        if arr_len != 0:
-            if arr_len == len(array):
-                wav_arr.append(array)
+        if array_len != 0:
+            if(len(array) == array_len):
+                wav_array.append(array)
         else:
-            arr_len = len(array)
-            wav_arr.append(array)
-    return wav_arr
-
-
-na_wavs = load_wavs(path.dirname(__file__) + "/Audio_Data/Wav_Data/North_America", 1)
-ind_wavs = load_wavs(path.dirname(__file__) + "/Audio_Data/Wav_Data/India", 1)
+            array_len = len(array)
+            wav_array.append(array)
+    return wav_array
 
 
 def wav_create_array_and_labels(*argv):
@@ -275,33 +225,45 @@ def wav_create_array_and_labels(*argv):
         arr_choice = numpy.random.randint(0,num_classes)
         #print(arr_choice)
         if(len(argv[arr_choice]) != 0):
-            print(str(len(argv[arr_choice])) + ": " + str(arr_choice))
-            data_array.append(numpy.asarray(argv[arr_choice].pop()))
+            data_array.append(argv[arr_choice].pop())
             label_array.append(arr_choice)
         for arg in argv:
             if len(arg) != 0:
                 non_empty_arrays = True
     data_array = numpy.asarray(data_array)
-    data_array.reshape(data_array.shape[0], data_array.shape[1], 1)
     label_array = numpy.asarray(label_array)
     label_array = keras.utils.to_categorical(label_array, num_classes)
     return (data_array, label_array)
 
 
+
+
+
+
+
+
+
+
+na_wavs = load_wavs(path.dirname(__file__) + "/Audio_Data/Wav_Data/North_America", 1)
+ind_wavs = load_wavs(path.dirname(__file__) + "/Audio_Data/Wav_Data/India", 1)
+
+
+
 wav_data_array, wav_label_array = wav_create_array_and_labels(na_wavs, ind_wavs)
 
-#print(wav_data_array[0])
-#print(type(wav_data_array[0]))
-#print(wav_label_array[0])
-#print(wav_data_array.shape)
 
-wav_train_data, wav_train_labels, wav_test_data, wav_test_labels = uniform_random_sampling(wav_data_array, wav_label_array, 1500)
+#uniform_random_sampling(wav_data_array, wav_label_array, 100)
 
-#print(wav_train_data.shape)
-#print(wav_train_labels.shape)
-#print(wav_test_data.shape)
-#print(wav_test_labels.shape)
 
+wav_sampled_train_data, wav_sampled_train_labels, wav_sampled_test_data, wav_sampled_test_labels = uniform_random_sampling(wav_data_array, wav_label_array, 100)
+
+
+for i in range(50):
+    print(wav_sampled_train_data[i])
+    print(wav_sampled_train_labels[i])
+
+
+#wav_k_folds_arr = sample_for_k_folds(wav_data_array, wav_label_array, 5)
 
 
 # create model
@@ -312,9 +274,7 @@ wav_model.add(Dense(2, activation='sigmoid'))
 
 wav_model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
 
-wav_model.fit(wav_train_data, wav_train_labels, epochs=15, batch_size=10, validation_data=(wav_test_data, wav_test_labels))
+wav_model.fit(wav_sampled_train_data, wav_sampled_train_labels, epochs=15, batch_size=10)
 
-score = wav_model.evaluate(wav_test_data, wav_test_labels, verbose=0)
-
-print('Test loss:', score[0])
-print('Test accuracy:', score[1])
+scores = wav_model.evaluate(wav_sampled_test_data, wav_sampled_test_labels)
+print("\n%s: %.2f%%" % (wav_model.metrics_names[1], scores[1]*100))
