@@ -275,7 +275,7 @@ def wav_create_array_and_labels(*argv):
         arr_choice = numpy.random.randint(0,num_classes)
         #print(arr_choice)
         if(len(argv[arr_choice]) != 0):
-            print(str(len(argv[arr_choice])) + ": " + str(arr_choice))
+            #print(str(len(argv[arr_choice])) + ": " + str(arr_choice))
             data_array.append(numpy.asarray(argv[arr_choice].pop()))
             label_array.append(arr_choice)
         for arg in argv:
