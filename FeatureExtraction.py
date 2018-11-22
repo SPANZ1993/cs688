@@ -14,6 +14,7 @@ from pydub.playback import play
 from convert_WAVtoMFCC import convert_WAVtoMFCC, create_mfcc
 
 
+
 #List all files in a directory except hidden files
 #This does not include subdirectories
 def listdir_ignore_hidden(path):
@@ -283,3 +284,91 @@ def create_mfcc_array(wav_folder):
 
 #convert_folder_to_windows(path.dirname(__file__) + "/Audio_Data/Mp3_Data/Test_Hindi", path.dirname(__file__) + "/Audio_Data/Wav_Data/Test_Hindi", 500)
 #convert_folder_to_mfcc(path.dirname(__file__) + "/Audio_Data/Wav_Data/Test_Hindi", path.dirname(__file__) + "/Audio_Data/MFCC_Data/Test_Hindi")
+
+
+
+
+import librosa
+from librosa.feature.spectral import chroma_stft
+
+def create_chroma_array(wav_folder):
+    files = listdir_ignore_hidden(wav_folder)
+    chroma_arr = []
+    print(len(files))
+    count = 0
+    pad_count = 0
+    for file in files:
+        #print("Converting: " + str(count))
+        count = count+1
+        sound = AudioSegment.from_file(os.path.join(wav_folder, file))
+        samples = sound.get_array_of_samples()
+        padding = False
+        while(len(samples) < 22050): #Add zero padding if wav not long enough
+            padding = True
+            samples.append(0)
+        if padding:
+            print("ADDED PADDING")
+        #print(type(samples))
+        float_samples = []
+        for i in range(len(samples)):
+            #print(samples[i])
+            float_samples.append(float(samples[i]))
+        samples = np.asarray(float_samples)
+        #print(type(samples))
+        #print(samples)
+        #print(type(samp))
+        chroma = chroma_stft(samples)
+        print(chroma.shape)
+        chroma = np.swapaxes(chroma,0,1)
+        #print(chroma.shape)
+        chroma_arr.append(chroma)
+        #print("WOOT")
+        #print(mfcc_arr)
+    print("Converted :" + str(len(files)))
+    #print("TYPE IS: " + str(type(chroma_arr)))
+    #mfcc_arr = np.asarray(mfcc_arr)
+    #mfcc_arr = mfcc_arr.reshape(mfcc_arr.shape[0], mfcc_arr.shape[1], mfcc_arr.shape[2], 1)
+    #print("TYPE IS: " + str(type(mfcc_arr)))
+    return chroma_arr
+
+#c_arr = create_chroma_array(path.dirname(__file__) + "/Audio_Data/Wav_Data/North_America")
+#mfcc_arr = create_mfcc_array(path.dirname(__file__) + "/Audio_Data/Wav_Data/North_America")
+
+#for i in range(5):
+#    print(c_arr[i])
+#print("(((((((((((((((((((((((((((((())))))))))))))))))))))))))))))")
+#for i in range(5):
+#    print(mfcc_arr[i])
+
+
+#Removes wav files of inconsistent length from wav folder
+#Finds proper length and then deletes all wavs that are not that length
+def clean_wav_folder(wav_folder):
+    files = listdir_ignore_hidden(wav_folder)
+    print("ORIGINALLY " + str(len(files)) + " FILES")
+    check_length = -1
+    del_files = []
+    find_len_count = 0
+    cur_file = 0
+    while find_len_count < 3 and cur_file < len(files):
+        sound = AudioSegment.from_file(os.path.join(wav_folder, files[cur_file]))
+        samples = sound.get_array_of_samples()
+        if(len(samples) != check_length):
+            check_length = len(samples)
+            find_len_count = 0
+        elif len(samples) == check_length:
+            find_len_count = find_len_count + 1
+        cur_file = cur_file + 1
+    #check_length now holds the standard wav file length
+    for file in files:
+        sound = AudioSegment.from_file(os.path.join(wav_folder, file))
+        samples = sound.get_array_of_samples()
+        if(len(samples) != check_length):
+            os.remove(os.path.join(wav_folder, file))
+    new_files = listdir_ignore_hidden(wav_folder)
+    print("NOW " + str(len(new_files)) + " FILES")
+
+
+#NOT SURE WHY BUT THIS SEVERELY LESSENS THE CLASSIFICATION RATE
+#clean_wav_folder(path.dirname(__file__) + "/Audio_Data/Wav_Data/North_America")
+#clean_wav_folder(path.dirname(__file__) + "/Audio_Data/Wav_Data/India")
