@@ -306,8 +306,8 @@ def create_chroma_array(wav_folder):
         while(len(samples) < 22050): #Add zero padding if wav not long enough
             padding = True
             samples.append(0)
-        if padding:
-            print("ADDED PADDING")
+        #if padding:
+            #print("ADDED PADDING")
         #print(type(samples))
         float_samples = []
         for i in range(len(samples)):
@@ -339,6 +339,92 @@ def create_chroma_array(wav_folder):
 #print("(((((((((((((((((((((((((((((())))))))))))))))))))))))))))))")
 #for i in range(5):
 #    print(mfcc_arr[i])
+
+
+
+
+
+#Creates a dictionary that contains an array of both the mfcc and chroma feature arrays
+#Feature Dictionary looks like {'MFCC': <mfcc_feature_array>, 'Chroma': <chroma_feature_array>}
+#Need to do this so that mfcc_feature_array[i] and chroma_feature_array[i] were generated -
+#- from the same .wav file (Need this for cotraining)
+def create_feature_dictionary(wav_folder):
+    files = listdir_ignore_hidden(wav_folder)
+    mfcc_arr = []
+    chroma_arr = []
+    print(len(files))
+    count = 0
+    for file in files:
+
+        #MFCC
+        #print("Converting: " + str(count))
+        count = count+1
+        mfcc_arr.append(create_mfcc(os.path.join(wav_folder, file)))
+        #print("WOOT")
+        #print(mfcc_arr)
+        #print("Converting: " + str(count))
+
+
+        #CHROMA
+        count = count+1
+        sound = AudioSegment.from_file(os.path.join(wav_folder, file))
+        samples = sound.get_array_of_samples()
+        padding = False
+        while(len(samples) < 22050): #Add zero padding if wav not long enough
+            padding = True
+            samples.append(0)
+        #if padding:
+            #print("ADDED PADDING")
+        #print(type(samples))
+        float_samples = []
+        for i in range(len(samples)):
+            #print(samples[i])
+            float_samples.append(float(samples[i]))
+        samples = np.asarray(float_samples)
+        #print(type(samples))
+        #print(samples)
+        #print(type(samp))
+        chroma = chroma_stft(samples)
+        #print(chroma.shape)
+        chroma = np.swapaxes(chroma,0,1)
+        #print(chroma.shape)
+        chroma_arr.append(chroma)
+
+
+    print("Converted :" + str(len(files)))
+    #print("TYPE IS: " + str(type(mfcc_arr)))
+    #mfcc_arr = np.asarray(mfcc_arr)
+    #mfcc_arr = mfcc_arr.reshape(mfcc_arr.shape[0], mfcc_arr.shape[1], mfcc_arr.shape[2], 1)
+    #print("TYPE IS: " + str(type(mfcc_arr)))
+    if(len(mfcc_arr) != len(chroma_arr)):
+        print("DIFFERENT LENGTHS!!!")
+        print(len(mfcc_arr))
+        print(len(chroma_arr))
+    else:
+        print("THEYRE THE SAME LENGTH!!!")
+    feature_dict = {'MFCC': mfcc_arr, 'Chroma': chroma_arr}
+    return feature_dict
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 #Removes wav files of inconsistent length from wav folder

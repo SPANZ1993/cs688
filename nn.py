@@ -52,6 +52,7 @@ def uniform_random_sampling(data, labels, sample_size):
     #print(complement_data.shape)
     #print(complement_labels.shape)
     #print("((((((((()))))))))")
+    #Construct shape of new sampled data
     sampled_data_shape = [sample_size]
     count = 0
     for s in complement_data.shape:
@@ -240,8 +241,6 @@ print("BEGINNING MFCC TRAINING.....")
 
 
 
-
-
 input_shape = (sampled_train_data.shape[1],sampled_train_data.shape[2],sampled_train_data.shape[3])
 num_classes = 2
 
@@ -275,6 +274,8 @@ score = model.evaluate(sampled_test_data, sampled_test_labels, verbose=0)
 print('Test loss:', score[0])
 print('Test accuracy:', score[1])
 
+
+print(model.predict(sampled_test_data))
 
 
 
@@ -381,7 +382,6 @@ score = wav_model.evaluate(wav_test_data, wav_test_labels, verbose=0)
 print('Test loss:', score[0])
 print('Test accuracy:', score[1])
 '''
-
 
 
 
